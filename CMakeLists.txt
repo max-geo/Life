@@ -19,6 +19,10 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.4.16
 )
+
+set(SDL_SHARED OFF)
+set(SDL_STATIC ON)
+
 FetchContent_MakeAvailable(SDL3)
 
 set(SOURCES
@@ -26,7 +30,7 @@ set(SOURCES
 )
 add_executable(life ${SOURCES})
 
-target_link_libraries(life PRIVATE SDL3::SDL3)
+target_link_libraries(life PRIVATE SDL3::SDL3-static)
 target_include_directories(life PRIVATE include)
 
 if (NOT MSVC)
