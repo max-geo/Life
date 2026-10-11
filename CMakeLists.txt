@@ -27,6 +27,7 @@ FetchContent_MakeAvailable(SDL3)
 
 set(SOURCES
     src/main.cpp
+    src/quadtree.cpp
 )
 add_executable(life ${SOURCES})
 
