@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
 #include <iostream>
+#include "quadtree.h"
 
 
 int main(int argc, char *argv[]){
@@ -20,40 +21,28 @@ int main(int argc, char *argv[]){
         SDL_Quit();
         return 1;   
     }
+    
+    int quadtree_size = 64;
 
-    SDL_Surface* bmp = SDL_LoadBMP("dota.bmp");
-    if (bmp == nullptr) {
-        std::cerr << "SDL_LoadBMP Error: " << SDL_GetError() << std::endl;
-        SDL_DestroyRenderer(ren);
-        SDL_DestroyWindow(win);
-        SDL_Quit();
-        return 1;
-    }
-
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(ren, bmp);
-    SDL_DestroySurface(bmp);
-    if (tex == nullptr) {
-        std::cerr << "SDL_CreateTextureFromSurface Error: " << SDL_GetError() << std::endl; 
-        SDL_DestroyWindow(win);
-        SDL_DestroyRenderer(ren);
-        SDL_Quit();
-        return 1;   
-    }
+    Quadtree q = Quadtree(quadtree_size);
+    q.insert(Point{3, 0});
 
     SDL_Event e;
+
     bool quit = false;
-    while (!quit) {
+
+    while (!quit) { // main loop
         while (SDL_PollEvent(&e)){
             if (e.type == SDL_EVENT_QUIT) {
                 quit = true;
             }
         }
+        SDL_SetRenderDrawColor(ren, 255, 255, 255, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(ren);
-        SDL_RenderTexture(ren, tex, NULL, NULL);
+        // SDL_RenderRects(ren,);
         SDL_RenderPresent(ren);
     }
     
-    SDL_DestroyTexture(tex);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();

@@ -3,45 +3,49 @@
 #include <vector>
 #include <memory>
 #include <optional> 
+#include <unordered_map>
+#include <array>
 
-struct Point { //TODO: check if float points fucks anything up
+struct Point {
     float x;
     float y;
+};
 
-    bool operator==(const Point& other) const {
-        return x == other.x && y == other.y;
+struct Node {
+    std::array<Node*, 4> children;
+
+    int population;
+    int level;
+
+    Node* result; //middle half-size square after 2^(k-2) generations
+};
+
+struct NodeArrayHash {
+    std::size_t operator()(const std::array<Node*, 4>& a) const noexcept {
+        std::size_t h = 0;
+        for (Node* p : a) {
+            h ^= std::hash<Node*>{}(p) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+        }
+        return h;
     }
-};
-
-struct BoundingBox {
-    Point center;
-    float half_dimension;
-};
+}; 
 
 class Quadtree {
 public:
-    Quadtree(float dimension, Point center);
-
+    Quadtree(int p_size);
+    
     bool insert(Point p);
-    bool remove(Point p);
-    bool in_border(Point p);
-    bool is_empty();
-
-    Point search(Point p);
-
-    void print_points();
-    void print_layers(Quadtree* q, int layer);
-    std::optional<Point> point;
 
 private:
-    BoundingBox border;
+    int size;
+    int length;
+    int max_level;
 
-    void init_children();
-
-    std::unique_ptr<Quadtree> NW;
-    std::unique_ptr<Quadtree> NE;
-    std::unique_ptr<Quadtree> SE;
-    std::unique_ptr<Quadtree> SW;
+    Node* dead;
+    Node* alive;
+    Node* root = nullptr;
     
-    Quadtree* children[4] = {nullptr, nullptr, nullptr, nullptr}; 
+    Node* join(std::array<Node*, 4> arr);
+
+    std::unordered_map<std::array<Node*, 4>, Node*, NodeArrayHash> table;
 };
