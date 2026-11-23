@@ -9,10 +9,9 @@
 using namespace::std;
 
 
-Quadtree::Quadtree(int p_size) {
-    size = p_size;
-    length = sqrt(size);
-    max_level = log2(size)/2;
+Quadtree::Quadtree(int p_length) {
+    length = p_length;
+    max_level = log2(length);
 
     
     dead = new Node{
@@ -49,7 +48,7 @@ Node* Quadtree::join(array<Node*, 4> arr){
     }
 }
 
-bool Quadtree::insert(Point p){
+void Quadtree::insert(Point p) { // NOTE: no check for put of bounds, such a value clamps to maximum, so lower right corner 
     Node* curr_quad = root; 
     Node* prev_quad;
 
@@ -79,6 +78,8 @@ bool Quadtree::insert(Point p){
         curr_quad = curr_quad->children[curr_card];
         path.push_back({prev_quad, curr_card});
 
+        if (right_side) curr_x -= curr_len/2;
+        if (bottom_side) curr_y -= curr_len/2;
         curr_len /= 2;
     }
     
@@ -101,5 +102,30 @@ bool Quadtree::insert(Point p){
 
         if (k == max_level - 1) root = curr_quad;
     }
-    return true;
+}
+
+void Quadtree::recurse(vector<Cell>& cells, Node* n, Point curr_position, float curr_length) {
+    if (n->children[0] != nullptr) {
+        // NOTE: idea for pruning if I remove paddings   
+        // if (n->population == pow(2, 2*n->level)) {
+        //     cells.push_back({curr_position.x, curr_position.y, curr_length});
+
+        // } else 
+        for (int i = 0; i < 4; i++) {
+            Node* c = n->children[i];
+            if (c->population > 0){
+                Point new_position = {curr_position.x + (i & 1) * curr_length/2, curr_position.y + (i>>1) * curr_length/2}; // bit trick
+                recurse(cells, c, new_position, curr_length/2);
+            }
+        }
+
+    } else {
+        cells.push_back({curr_position.x, curr_position.y, curr_length});
+    }
+}
+
+vector<Cell> Quadtree::aliveCells() {
+    vector<Cell> cells; 
+    recurse(cells, root, {0, 0}, length);
+    return cells;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include <vector>
 #include <memory>
 #include <optional> 
@@ -9,6 +11,10 @@
 struct Point {
     float x;
     float y;
+};
+
+struct Cell {
+    float x, y, length;
 };
 
 struct Node {
@@ -32,12 +38,13 @@ struct NodeArrayHash {
 
 class Quadtree {
 public:
-    Quadtree(int p_size);
+    Quadtree(int p_length);
     
-    bool insert(Point p);
+    void insert(Point p);
+    
+    std::vector<Cell> aliveCells();
 
 private:
-    int size;
     int length;
     int max_level;
 
@@ -46,6 +53,8 @@ private:
     Node* root = nullptr;
     
     Node* join(std::array<Node*, 4> arr);
+
+    void recurse(std::vector<Cell>& cells, Node* n, Point curr_position, float curr_length);
 
     std::unordered_map<std::array<Node*, 4>, Node*, NodeArrayHash> table;
 };
